@@ -21,9 +21,7 @@ let processor = {
 
 
     doLoad: function () {
-        console.log("doLoad");
         this.video = document.getElementById("video");
-        console.log(video);
         this.action = document.getElementById("action");
         this.c1 = document.getElementById("c1");
         this.ctx1 = this.c1.getContext("2d");
@@ -31,8 +29,8 @@ let processor = {
         this.ctx2 = this.c2.getContext("2d");
         let self = this;
         this.video.addEventListener("play", function () {
-            self.width = self.video.videoWidth / 2;
-            self.height = self.video.videoHeight / 2;
+            self.width = self.video.videoWidth * 0.6;
+            self.height = self.video.videoHeight * 0.6;
             c1.width = self.width;
             c1.height = self.height;
             c2.width = self.width;
@@ -84,17 +82,17 @@ let processor = {
     }
 };
 
-var fileInput = document.getElementById("csv");
 
-fileInput.addEventListener('change', () => {
-    fileInput.hidden = true;
+loadCSV = function () {
+    document.getElementById("loadCSVArea").hidden = true;
+    document.getElementById("videos").hidden = false;
+    var fileInput = document.getElementById("csv");
     var reader = new FileReader();
     reader.onload = function () {
-        //processor.doLoad();
-        console.log(reader.result);
+        console.log("loadCSV");
     };
     reader.readAsBinaryString(fileInput.files[0]);
-});
+};
 
 document.addEventListener("DOMContentLoaded", () => {
     processor.doLoad();
