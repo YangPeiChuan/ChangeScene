@@ -15,9 +15,12 @@
     <div>
         <video id="video" muted autoplay="autoplay" loop="loop" src="Screnes/1/main.mp4" width="0px" height="0px"></video>
         <video id="action" src="Screnes/1/action1.mp4" controls="controls" width="20%" height="20%"></video>
+        <input id="csv" type="file" />
     </div>
     <div>
-        <canvas id="c1"></canvas>
+        <canvas id="c1" style="background-image:url(Screnes/1/bgs.png);background-size:cover"></canvas>
+    </div>
+    <div hidden="hidden">
         <canvas id="c2" hidden="hidden"></canvas>
     </div>
     <script type="text/javascript" src="processor.js"></script>
