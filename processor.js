@@ -11,14 +11,14 @@ let processor = {
         window.requestAnimationFrame(processor.timerCallbackMain);
     },
 
-    timerCallbackAction: function () {
-        if (this.action.paused || this.action.ended) {
-            processor.proportion = 0;
-            return;
-        }
-        processor.computeFrameAction();
-        window.requestAnimationFrame(processor.timerCallbackAction);
-    },
+    //timerCallbackAction: function () {
+    //    if (this.action.paused || this.action.ended) {
+    //        processor.proportion = 0;
+    //        return;
+    //    }
+    //    processor.computeFrameAction();
+    //    window.requestAnimationFrame(processor.timerCallbackAction);
+    //},
 
     doLoad: function () {
         vBG = document.getElementById("vBG");
@@ -38,9 +38,9 @@ let processor = {
             self.timerCallbackMain();
         }, false);
 
-        this.action.addEventListener("play", function () {
-            self.timerCallbackAction();
-        }, false);
+        //this.action.addEventListener("play", function () {
+        //    self.timerCallbackAction();
+        //}, false);
     },
 
     computeFrame: function () {
@@ -76,10 +76,10 @@ let processor = {
         return;
     },
 
-    computeFrameAction: function () {
-        this.ctx2.drawImage(this.action, 0, 0, this.width, this.height);
-        return;
-    }
+    //computeFrameAction: function () {
+    //    this.ctx2.drawImage(this.action, 0, 0, this.width, this.height);
+    //    return;
+    //}
 };
 
 loadCSV = function () {
@@ -100,7 +100,7 @@ loadCSV = function () {
                     v.loop = true;
                     v.src = columns[1];
                     v.width = 0;
-                    v.hidden = 0;
+                    v.height = 0;
                     document.getElementById("bgContain").append(v);
                     break;
                 case "BGI":
@@ -108,7 +108,13 @@ loadCSV = function () {
                     c.style.backgroundImage = `url(${columns[1]})`;
                     c.style.backgroundSize = "cover";
                     break;
-                case "E":
+                case "A":
+                    var a = document.createElement("video");
+                    a.id = "action";
+                    a.src = columns[1];
+                    a.controls = true;
+                    a.hidden = true;
+                    document.getElementById("actions").append(a);
                     break;
                 default:
                     break;
@@ -117,6 +123,18 @@ loadCSV = function () {
         processor.doLoad();
     };
     reader.readAsBinaryString(fileInput.files[0]);
+};
+
+vedioControl = function (keyCode) {
+    if (keyCode === 123) return;
+    console.log(keyCode);
+    var a = document.getElementById("action");
+    if (a.paused || a.ended) {
+        a.play();
+    }
+    else {
+        a.pause();
+    }
 };
 
 //document.addEventListener("DOMContentLoaded", () => {

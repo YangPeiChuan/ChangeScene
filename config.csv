@@ -1,4 +1,4 @@
-BG/BGI/E,SourcePath,FireKey,FadeOut
+BG/BGI/A,SourcePath,FireKey,FadeOut
 BG,Screnes/1/main.mp4,,
 BGI,Screnes/1/bgs.png,,
-E,Screnes/1/action1.mp4,,
+A,Screnes/1/action1.mp4,,
