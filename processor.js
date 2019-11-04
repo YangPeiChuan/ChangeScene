@@ -11,15 +11,6 @@ let processor = {
         window.requestAnimationFrame(processor.timerCallbackMain);
     },
 
-    //timerCallbackAction: function () {
-    //    if (this.action.paused || this.action.ended) {
-    //        processor.proportion = 0;
-    //        return;
-    //    }
-    //    processor.computeFrameAction();
-    //    window.requestAnimationFrame(processor.timerCallbackAction);
-    //},
-
     doLoad: function () {
         vBG = document.getElementById("vBG");
         this.action = document.getElementById("action");
@@ -37,10 +28,6 @@ let processor = {
             c2.height = self.height;
             self.timerCallbackMain();
         }, false);
-
-        //this.action.addEventListener("play", function () {
-        //    self.timerCallbackAction();
-        //}, false);
     },
 
     computeFrame: function () {
@@ -74,12 +61,7 @@ let processor = {
             processor.proportion += 1;
         }
         return;
-    },
-
-    //computeFrameAction: function () {
-    //    this.ctx2.drawImage(this.action, 0, 0, this.width, this.height);
-    //    return;
-    //}
+    }
 };
 
 loadCSV = function () {
@@ -108,7 +90,7 @@ loadCSV = function () {
                     c.style.backgroundImage = `url(${columns[1]})`;
                     c.style.backgroundSize = "cover";
                     break;
-                case "A":
+                case "Object":
                     var a = document.createElement("video");
                     a.id = "action";
                     a.src = columns[1];
@@ -136,6 +118,3 @@ vedioControl = function (keyCode) {
         a.pause();
     }
 };
-
-//document.addEventListener("DOMContentLoaded", () => {
-//});

@@ -1,4 +1,4 @@
-BG/BGI/A,SourcePath,FireKey,FadeOut
-BG,Screnes/1/main.mp4,,
-BGI,Screnes/1/bgs.png,,
-A,Screnes/1/action1.mp4,,
+BG/BGI/Object,SourcePath,FireKey,FadeIn,FadeOut,"FadePara(Default:15,Max:255)",Loop
+BG,Screnes/1/main.mp4,,,,,
+BGI,Screnes/1/bgs.png,,,,,
+Object,Screnes/1/action1.mp4,A,,,,
