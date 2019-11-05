@@ -2,6 +2,7 @@ let processor = {
 
     proportion: 0,
     vBG: null,
+    actions: new Map(),
 
     timerCallbackMain: function () {
         if (vBG.paused || vBG.ended) {
@@ -20,8 +21,8 @@ let processor = {
         this.ctx2 = this.c2.getContext("2d");
         let self = this;
         vBG.addEventListener("play", function () {
-            self.width = vBG.videoWidth * 0.6;
-            self.height = vBG.videoHeight * 0.6;
+            self.width = vBG.videoWidth * 0.885;
+            self.height = vBG.videoHeight * 0.885;
             c1.width = self.width;
             c1.height = self.height;
             c2.width = self.width;
@@ -74,7 +75,7 @@ loadCSV = function () {
         for (var i = 1; i < rows.length - 1; i++) {
             var columns = rows[i].split(/[,]/);
             switch (columns[0]) {
-                case "BG":
+                case "BG": {
                     let v = document.createElement("video");
                     v.id = "vBG";
                     v.muted = true;
@@ -85,19 +86,28 @@ loadCSV = function () {
                     v.height = 0;
                     document.getElementById("bgContain").append(v);
                     break;
-                case "BGI":
+                }
+                case "BGI": {
                     var c = document.getElementById("c1");
                     c.style.backgroundImage = `url(${columns[1]})`;
                     c.style.backgroundSize = "cover";
                     break;
-                case "Object":
+                }
+                case "Object": {
                     var a = document.createElement("video");
                     a.id = "action";
                     a.src = columns[1];
                     a.controls = true;
                     a.hidden = true;
+                    a.loop = columns[6] === 'TRUE';
                     document.getElementById("actions").append(a);
+                    processor.actions.set(columns[2].charCodeAt(0), {
+                        dom: a,
+                        FadePara: columns[5].length === 0 ? 15 : Number.parseInt(columns[5]),
+                        FadeNow: 0
+                    });
                     break;
+                }
                 default:
                     break;
             }
@@ -109,12 +119,11 @@ loadCSV = function () {
 
 vedioControl = function (keyCode) {
     if (keyCode === 123) return;
-    console.log(keyCode);
-    var a = document.getElementById("action");
-    if (a.paused || a.ended) {
-        a.play();
-    }
-    else {
-        a.pause();
+    if (processor.actions.has(keyCode)) {
+        var a = document.getElementById("action");
+        if (a.paused || a.ended)
+            a.play();
+        else
+            a.pause();
     }
 };
