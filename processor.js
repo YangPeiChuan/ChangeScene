@@ -1,69 +1,153 @@
-let processor = {
+/** @type {Map<string,MyVideo>} */
+var fadeInVideos = new Map();
 
-    proportion: 0,
-    vBG: null,
-    actions: new Map(),
+/** @type {Map<string,MyVideo>} */
+var fadeOutVideos = new Map();
 
-    timerCallbackMain: function () {
-        if (vBG.paused || vBG.ended) {
-            return;
+class MyVideo {
+
+    //#region Field
+
+    /** @type {MyVideo}*/
+    Next = null;
+
+    //#endregion 
+
+    /**
+     * 
+     * @param {string} id
+     * @param {string} type
+     * @param {string} src
+     * @param {string} fireKey
+     * @param {boolean} isLoop
+     * @param {number} fadeIn
+     * @param {number} fadeOut
+     * @param {boolean} autoplay
+     */
+    constructor(id, type, src, fireKey, isLoop, fadeIn = 1, fadeOut = 1, autoplay = false) {
+
+        /** @type {number}*/
+        this.Opacity = fadeIn === 1 ? 1 : 0;
+
+        /** @type {number}*/
+        this.FadeIn = fadeIn;
+
+        /** @type {number}*/
+        this.FadeOut = fadeOut;
+
+        /** @type {string}*/
+        this.ID = id;
+
+        this.Type = type;
+
+        this.CharCode = fireKey.length > 0 ? fireKey.charCodeAt(0) : null;
+
+        let v = document.createElement("video");
+        v.muted = true;
+        v.autoplay = autoplay;
+        v.loop = isLoop;
+        v.src = src;
+        v.style.opacity = this.Opacity;
+        v.classList.add("fixPosition");
+
+        switch (type) {
+            case "BG": {
+                v.id = `bg-${id}`;
+                document.getElementById("bgContain").append(v);
+                break;
+            }
+            case "Object": {
+                v.id = `obj-${id}`;
+                document.getElementById("objects").append(v);
+                break;
+            }
+            default:
+                alert(`ID(快捷鍵)${id}資料有誤`);
+                break;
         }
-        processor.computeFrame();
-        window.requestAnimationFrame(processor.timerCallbackMain);
-    },
 
-    doLoad: function () {
-        vBG = document.getElementById("vBG");
-        this.action = document.getElementById("action");
-        this.c1 = document.getElementById("c1");
-        this.ctx1 = this.c1.getContext("2d");
-        this.c2 = document.getElementById("c2");
-        this.ctx2 = this.c2.getContext("2d");
-        let self = this;
-        vBG.addEventListener("play", function () {
-            self.width = vBG.videoWidth * 0.885;
-            self.height = vBG.videoHeight * 0.885;
-            c1.width = self.width;
-            c1.height = self.height;
-            c2.width = self.width;
-            c2.height = self.height;
-            self.timerCallbackMain();
-        }, false);
-    },
+        /** @type {HTMLVideoElement}*/
+        this.Dom = v;
+    }
 
-    computeFrame: function () {
-        if (this.action.paused || this.action.ended) {
-            this.ctx1.drawImage(vBG, 0, 0, this.width, this.height);
+    Fire() {
+        if (this.Dom.paused || this.Dom.ended) {
+            fadeInVideos.set(this.ID, this);
+            this.Dom.hidden = false;
+            this.Dom.play();
+
+            if (fadeInVideos.size === 1)
+                MyVideo._playFadeIn();
         }
         else {
-            this.ctx2.drawImage(vBG, 0, 0, this.width, this.height);
-            let frame1 = this.ctx2.getImageData(0, 0, this.width, this.height);
-            this.ctx2.drawImage(this.action, 0, 0, this.width, this.height);
-            let frame2 = this.ctx2.getImageData(0, 0, this.width, this.height);
-
-            for (let i = 0; i < frame2.data.length; i += 4) {
-
-                if (frame2.data[i] > 10 && frame2.data[i + 1] > 10 && frame2.data[i + 2] > 10) {
-                    if (processor.proportion < 255) {
-                        var p = 1 - processor.proportion;
-                        frame1.data[i] = frame2.data[i];
-                        frame1.data[i + 1] = frame2.data[i + 1];
-                        frame1.data[i + 2] = frame2.data[i + 2];
-                        frame1.data[i + 3] = processor.proportion;
-                    }
-                    else {
-                        frame1.data[i] = frame2.data[i];
-                        frame1.data[i + 1] = frame2.data[i + 1];
-                        frame1.data[i + 2] = frame2.data[i + 2];
-                    }
-                }
-            }
-            this.ctx1.putImageData(frame1, 0, 0);
-            processor.proportion += 1;
+            fadeOutVideos.set(this.ID, this);
+            if (this.Next !== null)
+                this.Next.Dom.play();
+            if (fadeOutVideos.size === 1)
+                MyVideo._playFadeOut();
         }
-        return;
     }
-};
+
+    static _playFadeIn() {
+        /** @type {MyVideo[]}*/
+        var rmv = [];
+
+        fadeInVideos.forEach(function (fadeInVideo) {
+            if (fadeInVideo.Opacity === 1) {
+                rmv.push(fadeInVideo);
+                return;
+            }
+            fadeInVideo.Opacity = fadeInVideo.Opacity + fadeInVideo.FadeIn >= 1 ? 1 : fadeInVideo.Opacity + fadeInVideo.FadeIn;
+            fadeInVideo.Dom.style.opacity = fadeInVideo.Opacity;
+        });
+
+        rmv.forEach(function (mv) {
+            fadeInVideos.delete(mv.ID);
+            if (mv.Type === "BG")
+                mapper.delete(mv.CharCode);
+        });
+
+        if (fadeInVideos.size > 0)
+            window.requestAnimationFrame(MyVideo._playFadeIn);
+    }
+
+    static _playFadeOut() {
+        /** @type {MyVideo[]}*/
+        var rmv = [];
+        fadeOutVideos.forEach(function (fadeOutVideo) {
+
+            if (fadeOutVideo.Opacity === 0 && (fadeOutVideo.Next === null || fadeOutVideo.Next.Opacity === 1)) {
+                fadeOutVideo.Dom.pause();
+                fadeOutVideo.Dom.hidden = true;
+                fadeOutVideo.Dom.currentTime = 0;
+                rmv.push(fadeOutVideo);
+                return;
+            }
+
+            if (fadeOutVideo.Opacity !== 0) {
+                fadeOutVideo.Opacity = fadeOutVideo.Opacity - fadeOutVideo.FadeOut <= 0 ? 0 : fadeOutVideo.Opacity - fadeOutVideo.FadeOut;
+                fadeOutVideo.Dom.style.opacity = fadeOutVideo.Opacity;
+            }
+
+            if (fadeOutVideo.Next !== null && fadeOutVideo.Next.Opacity === 1) {
+                fadeOutVideo.Next.Opacity = fadeOutVideo.Next.Opacity + fadeOutVideo.Next.FadeIn >= 1 ? 1 : fadeOutVideo.Next.Opacity + fadeOutVideo.Next.FadeIn;
+                fadeOutVideo.Next.Dom.style.opacity = fadeOutVideo.Next.Opacity;
+            }
+        });
+
+        rmv.forEach(function (mv) {
+            fadeOutVideos.delete(mv.ID);
+            if (mv.Type === "BG")
+                mapper.delete(mv.CharCode);
+        });
+
+        if (fadeOutVideos.size > 0)
+            window.requestAnimationFrame(MyVideo._playFadeOut);
+    }
+}
+
+/** @type {Map<number,MyVideo>} */
+var mapper = new Map();
 
 loadCSV = function () {
     document.getElementById("loadCSVArea").hidden = true;
@@ -71,59 +155,42 @@ loadCSV = function () {
     var reader = new FileReader();
     reader.onload = function () {
         var rows = reader.result.split(/[\n]/);
-        var elementCount = 0;
+        var isFirstBG = true;
         for (var i = 1; i < rows.length - 1; i++) {
+            /** @type {string[]} */
             var columns = rows[i].split(/[,]/);
-            switch (columns[0]) {
-                case "BG": {
-                    let v = document.createElement("video");
-                    v.id = "vBG";
-                    v.muted = true;
-                    v.autoplay = true;
-                    v.loop = true;
-                    v.src = columns[1];
-                    v.width = 0;
-                    v.height = 0;
-                    document.getElementById("bgContain").append(v);
-                    break;
-                }
-                case "BGI": {
-                    var c = document.getElementById("c1");
-                    c.style.backgroundImage = `url(${columns[1]})`;
-                    c.style.backgroundSize = "cover";
-                    break;
-                }
-                case "Object": {
-                    var a = document.createElement("video");
-                    a.id = "action";
-                    a.src = columns[1];
-                    a.controls = true;
-                    a.hidden = true;
-                    a.loop = columns[6] === 'TRUE';
-                    document.getElementById("actions").append(a);
-                    processor.actions.set(columns[2].charCodeAt(0), {
-                        dom: a,
-                        FadePara: columns[5].length === 0 ? 15 : Number.parseInt(columns[5]),
-                        FadeNow: 0
-                    });
-                    break;
-                }
-                default:
-                    break;
+            var mv = new MyVideo(
+                columns[0],
+                columns[1],
+                columns[2],
+                columns[3],
+                columns[6] === "TRUE",
+                columns[4].length > 0 ? Number.parseFloat(columns[4]) : 1,
+                columns[5].length > 0 ? Number.parseFloat(columns[5]) : 1,
+                isFirstBG
+            );
+            if (mv.CharCode !== null) mapper.set(mv.CharCode, mv);
+
+            if (columns[7].length > 0) {
+                mapper.forEach(function (value, key, map) {
+                    if (value.ID === columns[7]) {
+                        value.Next = mv;
+                        return;
+                    }
+                });
+
             }
+            if (isFirstBG && columns[1] === "BG") isFirstBG = false;
         }
-        processor.doLoad();
     };
     reader.readAsBinaryString(fileInput.files[0]);
+    document.getElementById("bgContain").hidden = false;
+    document.getElementById("objects").hidden = false;
 };
 
 vedioControl = function (keyCode) {
     if (keyCode === 123) return;
-    if (processor.actions.has(keyCode)) {
-        var a = document.getElementById("action");
-        if (a.paused || a.ended)
-            a.play();
-        else
-            a.pause();
+    if (mapper.has(keyCode)) {
+        mapper.get(keyCode).Fire();
     }
 };

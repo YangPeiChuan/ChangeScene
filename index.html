@@ -12,6 +12,12 @@
         #bgContain {
             height: 0px;
         }
+
+        .fixPosition {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
     </style>
 </head>
 
@@ -19,16 +25,11 @@
     <div id="loadCSVArea">
         <input id="csv" type="file" /><input id="loadCSV" type="button" value="讀取CSV" onclick="loadCSV()" />
     </div>
-    <div id="bgContain">
-        <!--<video id="vBG" muted autoplay="autoplay" loop="loop" src="Screnes/1/main.mp4" width="0px" height="0px"></video>-->
+    <div id="bgContain" hidden="hidden" class="fixPosition">
+        <!--<video id="vBG" muted autoplay="autoplay" loop="loop" src="Screnes/1/main.mp4"></video>-->
     </div>
-    <!--<canvas id="c1" style="background-image:url(Screnes/1/bgs.png);background-size:cover"></canvas>-->
-    <canvas id="c1"></canvas>
-    <div id="actions">
-        <!--<video id="action" src="Screnes/1/action1.mp4" controls="controls" width="20%" height="20%"></video>-->
-    </div>
-    <div hidden="hidden">
-        <canvas id="c2" hidden="hidden"></canvas>
+    <div id="objects" hidden="hidden" class="fixPosition">
+        <!--<video src="Screnes/1/action3.webm" muted autoplay="autoplay" loop="loop"></video>-->
     </div>
     <script type="text/javascript" src="processor.js"></script>
 </body>
