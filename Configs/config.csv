@@ -1,0 +1,10 @@
+Number,BG/Object,SourcePath,FireKey(ID),FadeInParameter(0.0~1.0),FadeOutParameter(0.0~1.0),Loop,BeforeID,HiddenOnEnded(Default:TRUE),AutoAfterID,Note
+1,Object,Videos\action\light.webm,-,,,,,,,
+3,Object,Videos\action\Lrain.webm,=,0.01,0.01,TRUE,,,,
+9,Object,Videos\action\cloudop.webm,[,0.01,0.01,,,,,
+10,Object,Videos\action\cloudloop.webm,],0.01,0.01,TRUE,9,,,
+11,Object,Videos\action\clouded.webm,;,0.01,0.01,,10,,,
+23,BG,Videos\BG1\BG_OP.webm,z,,0.01,TRUE,,,,
+24,BG,Videos\BG1\BG_village(loop).webm,x,0.01,,TRUE,23,,,
+25,BG,Videos\BG1\BG_villtoSquare.webm,c,0.01,0.01,TRUE,24,,,
+26,BG,Videos\BG1\BG_squareM(loop).webm,v,0.01,0.01,TRUE,25,,,

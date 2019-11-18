@@ -1,0 +1,31 @@
+Number,BG/Object,SourcePath,FireKey(ID),FadeInParameter(0.0~1.0),FadeOutParameter(0.0~1.0),Loop,BeforeID,HiddenOnEnded(Default:TRUE),AutoNextID,Note
+1,Object,Videos\story\Ashadow1.webm,6,0.01,0.01,,,FALSE,,女主剪影
+2,Object,Videos\story\storyanim (5).webm,5,,0.01,,,FALSE,,愛情靈藥繪本短動畫
+3,Object,Videos\story\storyanim (4).webm,4,,,,,FALSE,,愛情靈藥繪本短動畫
+4,Object,Videos\story\storyanim (3).webm,3,,,,,FALSE,,愛情靈藥繪本短動畫
+5,Object,Videos\story\storyanim (2).webm,2,,,,,FALSE,,愛情靈藥繪本短動畫
+6,Object,Videos\story\storyanim (1).webm,1,,,,,FALSE,,愛情靈藥繪本短動畫
+7,Object,Videos\action\treelight.webm,q,0.005,0.01,TRUE,,,,三角周圍暗的聚焦光
+8,Object,Videos\action\light.webm,w,,,,,,,雷電
+9,Object,Videos\action\flash.webm,e,,,,,,,閃光
+10,Object,Videos\action\Lrain.webm,r,0.01,0.01,TRUE,,,,大雨
+11,Object,Videos\action\Mrain.webm,t,0.01,0.01,TRUE,,,,中雨
+12,Object,Videos\action\Srain.webm,y,0.01,0.01,TRUE,,,,小雨
+13,Object,Videos\action\sheepmanAndSheep.webm,u,,,,,,,牧童加羊
+14,Object,Videos\action\bird1.webm,a,,,,,,,鳥1
+15,Object,Videos\action\bird2.webm,s,,,,,,,鳥2
+16,Object,Videos\action\bird3.webm,d,,,,,,,鳥3
+17,Object,Videos\action\carriage2.webm,f,,,,,,,馬拉車1
+18,Object,Videos\action\carriage1.webm,g,,,,,,,馬拉車2
+19,Object,Videos\action\cloudop.webm,h,0.02,0.01,,,,,烏雲出現
+20,Object,Videos\action\cloudloop.webm,j,0.01,0.01,TRUE,19,,,烏雲循環
+21,Object,Videos\action\clouded.webm,k,0.01,0.02,,20,,,烏雲散去
+22,Object,Videos\action\BGblack.webm,l,0.01,0.01,TRUE,,,,黑白的廣場
+23,BG,Videos\BG\BG_OP.webm,z,0.01,0.01,,,,,1開場村口
+24,BG,Videos\BG\BG_village(loop).webm,x,,0.01,TRUE,23,,,2村口(循環)
+25,BG,Videos\BG\BG_villtoSquare.webm,c,,0.01,,24,,26,3村口到廣場
+26,BG,Videos\BG\BG_squareM(loop).webm,v,,0.01,TRUE,25,,,4廣場凌晨(循環)
+27,BG,Videos\BG\BG_squareA(loop).webm,b,,0.01,TRUE,26,,,5廣場白天(循環)
+28,BG,Videos\BG\BG_squareN(loop).webm,n,,0.01,TRUE,27,,,6廣場黃昏(循環)
+29,BG,Videos\BG\BG_squareNtoRoomN.webm,m,,0.01,,28,,30,7廣場到房前(黃昏)
+30,BG,Videos\BG\BG_roomN(loop).webm,.,,0.01,TRUE,29,,,8房前(黃昏)(循環)
