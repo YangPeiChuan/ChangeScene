@@ -1,18 +1,9 @@
-/** @type {Map<string,MyVideo>} */
-var fadeInVideos = new Map();
+var symbolKeyCode = new Map([["-", 189], ["=", 187], ["[", 219], ["]", 221], [";", 186], ["'", 222], [",", 188], [".", 190], ["/", 191], ["\\", 220], ["`", 192], [" ", 32], ["F1", 112], ["F2", 113], ["F3", 114], ["F4", 115], ["F5", 116], ["F6", 117], ["F7", 118], ["F8", 119], ["F9", 120], ["F10", 121], ["F11", 122], ["F12", 123]]);
 
 /** @type {Map<string,MyVideo>} */
-var fadeOutVideos = new Map();
+var fadeVideos = new Map();
 
 class MyVideo {
-
-    //#region Field
-
-    /** @type {MyVideo}*/
-    Next = null;
-
-    //#endregion 
-
     /**
      * 
      * @param {string} id
@@ -22,33 +13,50 @@ class MyVideo {
      * @param {boolean} isLoop
      * @param {number} fadeIn
      * @param {number} fadeOut
-     * @param {boolean} autoplay
+     * @param {string} beforeID
+     * @param {boolean} hiddenOnEnded
      */
-    constructor(id, type, src, fireKey, isLoop, fadeIn = 1, fadeOut = 1, autoplay = false) {
+    constructor(id, type, src, fireKey, isLoop, fadeIn = 1, fadeOut = 1, beforeID = null, hiddenOnEnded = true, zindex = null, autoNextID = null) {
 
+        //#region Field
         /** @type {number}*/
-        this.Opacity = fadeIn === 1 ? 1 : 0;
-
-        /** @type {number}*/
+        this._opacity = fadeIn === 1 ? 1 : 0;
+        /** @type {MyVideo}*/
+        this.Before = null;
+        /** @type {MyVideo}*/
+        this.AutoNext = null;
         this.FadeIn = fadeIn;
-
-        /** @type {number}*/
         this.FadeOut = fadeOut;
-
-        /** @type {string}*/
         this.ID = id;
-
         this.Type = type;
+        this.BeforeID = beforeID.length > 0 ? beforeID : null;
+        /** @type {number} */
+        this.FadeState = null;
+        this.HiddenOnEnded = hiddenOnEnded;
+        this.AutoNextID = autoNextID;
+        //#endregion 
 
-        this.CharCode = fireKey.length > 0 ? fireKey.charCodeAt(0) : null;
+        if (fireKey.length > 0) {
+            if (symbolKeyCode.has(fireKey))
+                this.CharCode = symbolKeyCode.get(fireKey);
+            else
+                this.CharCode = fireKey.toUpperCase().charCodeAt(0);
+        }
 
         let v = document.createElement("video");
         v.muted = true;
-        v.autoplay = autoplay;
         v.loop = isLoop;
         v.src = src;
-        v.style.opacity = this.Opacity;
+        v.style.opacity = this._opacity;
         v.classList.add("fixPosition");
+        v.hidden = true;
+        if (hiddenOnEnded) {
+            v.onended = function () {
+                document.getElementById(v.id).hidden = true;
+                v.currentTime = 0;
+            };
+        }
+        if (zindex !== null) v.style.zIndex = zindex;
 
         switch (type) {
             case "BG": {
@@ -62,7 +70,6 @@ class MyVideo {
                 break;
             }
             default:
-                alert(`ID(快捷鍵)${id}資料有誤`);
                 break;
         }
 
@@ -70,118 +77,139 @@ class MyVideo {
         this.Dom = v;
     }
 
+    get Opacity() { return this._opacity; }
+    set Opacity(o) {
+        this._opacity = o;
+        this.Dom.style.opacity = o;
+    }
+
     Fire() {
         if (this.Dom.paused || this.Dom.ended) {
-            fadeInVideos.set(this.ID, this);
+            if (this.Dom.ended && !this.HiddenOnEnded) {
+                if (this.FadeOut === 1) {
+                    this.Dom.hidden = true;
+                    this.Dom.currentTime = 0;
+                }
+                else {
+                    this.FadeState = 0;
+                    fadeVideos.set(this.ID, this);
+                    if (fadeVideos.size > 0) PlayFades();
+                }
+                return;
+            }
+
+            if (this.Before !== null) {
+                this.Before.FadeState = 0;
+                fadeVideos.set(this.BeforeID, this.Before);
+                this.Before.Dom.play();
+            }
+
+            this.FadeState = 1;
+            fadeVideos.set(this.ID, this);
             this.Dom.hidden = false;
             this.Dom.play();
 
-            if (fadeInVideos.size === 1)
-                MyVideo._playFadeIn();
+            if (fadeVideos.size > 0) PlayFades();
         }
         else {
-            fadeOutVideos.set(this.ID, this);
-            if (this.Next !== null)
-                this.Next.Dom.play();
-            if (fadeOutVideos.size === 1)
-                MyVideo._playFadeOut();
+            this.FadeState = 0;
+            fadeVideos.set(this.ID, this);
+
+            if (fadeVideos.size > 0) PlayFades();
         }
-    }
-
-    static _playFadeIn() {
-        /** @type {MyVideo[]}*/
-        var rmv = [];
-
-        fadeInVideos.forEach(function (fadeInVideo) {
-            if (fadeInVideo.Opacity === 1) {
-                rmv.push(fadeInVideo);
-                return;
-            }
-            fadeInVideo.Opacity = fadeInVideo.Opacity + fadeInVideo.FadeIn >= 1 ? 1 : fadeInVideo.Opacity + fadeInVideo.FadeIn;
-            fadeInVideo.Dom.style.opacity = fadeInVideo.Opacity;
-        });
-
-        rmv.forEach(function (mv) {
-            fadeInVideos.delete(mv.ID);
-            if (mv.Type === "BG")
-                mapper.delete(mv.CharCode);
-        });
-
-        if (fadeInVideos.size > 0)
-            window.requestAnimationFrame(MyVideo._playFadeIn);
-    }
-
-    static _playFadeOut() {
-        /** @type {MyVideo[]}*/
-        var rmv = [];
-        fadeOutVideos.forEach(function (fadeOutVideo) {
-
-            if (fadeOutVideo.Opacity === 0 && (fadeOutVideo.Next === null || fadeOutVideo.Next.Opacity === 1)) {
-                fadeOutVideo.Dom.pause();
-                fadeOutVideo.Dom.hidden = true;
-                fadeOutVideo.Dom.currentTime = 0;
-                rmv.push(fadeOutVideo);
-                return;
-            }
-
-            if (fadeOutVideo.Opacity !== 0) {
-                fadeOutVideo.Opacity = fadeOutVideo.Opacity - fadeOutVideo.FadeOut <= 0 ? 0 : fadeOutVideo.Opacity - fadeOutVideo.FadeOut;
-                fadeOutVideo.Dom.style.opacity = fadeOutVideo.Opacity;
-            }
-
-            if (fadeOutVideo.Next !== null && fadeOutVideo.Next.Opacity === 1) {
-                fadeOutVideo.Next.Opacity = fadeOutVideo.Next.Opacity + fadeOutVideo.Next.FadeIn >= 1 ? 1 : fadeOutVideo.Next.Opacity + fadeOutVideo.Next.FadeIn;
-                fadeOutVideo.Next.Dom.style.opacity = fadeOutVideo.Next.Opacity;
-            }
-        });
-
-        rmv.forEach(function (mv) {
-            fadeOutVideos.delete(mv.ID);
-            if (mv.Type === "BG")
-                mapper.delete(mv.CharCode);
-        });
-
-        if (fadeOutVideos.size > 0)
-            window.requestAnimationFrame(MyVideo._playFadeOut);
     }
 }
 
+function PlayFades() {
+    /** @type {string[]} */
+    var waitDeleteKeys = [];
+    fadeVideos.forEach(function (value, key) {
+        switch (value.FadeState) {
+            case 0://Fade Out
+                {
+                    if (value.Opacity - value.FadeOut > 0)
+                        value.Opacity = value.Opacity - value.FadeOut;
+                    else {
+                        value.Dom.hidden = true;
+                        value.Opacity = 0;
+                        value.Dom.pause();
+                        value.Dom.currentTime = 0;
+                        waitDeleteKeys.push(key);
+                    }
+                    break;
+                }
+            case 1://Fade In
+                {
+                    if (value.Opacity + value.FadeIn < 1)
+                        value.Opacity = value.Opacity + value.FadeIn;
+                    else {
+                        value.Opacity = 1;
+                        waitDeleteKeys.push(key);
+                    }
+                    break;
+                }
+            default:
+                break;
+        }
+    });
+    waitDeleteKeys.forEach(function (value) { fadeVideos.delete(value); });
+    if (fadeVideos.size > 0) window.requestAnimationFrame(PlayFades);
+}
+
+const colNumber = 0, colType = 1, colSourcePath = 2, colFireKey = 3, colFadeIn = 4, colFadeOut = 5, colLoop = 6, colNextID = 7, colHiddenOnEnded = 8, colAutoNextID = 9;
+
 /** @type {Map<number,MyVideo>} */
-var mapper = new Map();
+var fireVideoKeys = new Map();
 
 loadCSV = function () {
     document.getElementById("loadCSVArea").hidden = true;
     var fileInput = document.getElementById("csv");
     var reader = new FileReader();
     reader.onload = function () {
+
+        /** @type {Map<string,MyVideo>} */
+        var allMVs = new Map();
+
         var rows = reader.result.split(/[\n]/);
-        var isFirstBG = true;
         for (var i = 1; i < rows.length - 1; i++) {
+
             /** @type {string[]} */
             var columns = rows[i].split(/[,]/);
+
             var mv = new MyVideo(
-                columns[0],
-                columns[1],
-                columns[2],
-                columns[3],
-                columns[6] === "TRUE",
-                columns[4].length > 0 ? Number.parseFloat(columns[4]) : 1,
-                columns[5].length > 0 ? Number.parseFloat(columns[5]) : 1,
-                isFirstBG
-            );
-            if (mv.CharCode !== null) mapper.set(mv.CharCode, mv);
+                columns[colNumber],
+                columns[colType],
+                columns[colSourcePath],
+                columns[colFireKey],
+                columns[colLoop] === "TRUE",
+                columns[colFadeIn].length > 0 ? Number.parseFloat(columns[4]) : 1,
+                columns[colFadeOut].length > 0 ? Number.parseFloat(columns[5]) : 1,
+                columns[colNextID],
+                columns[colHiddenOnEnded] !== "FALSE",
+                rows.length - Number.parseFloat(columns[colNumber]),
+                columns[colAutoNextID]);
+            if (mv.CharCode !== null) fireVideoKeys.set(mv.CharCode, mv);
 
-            if (columns[7].length > 0) {
-                mapper.forEach(function (value, key, map) {
-                    if (value.ID === columns[7]) {
-                        value.Next = mv;
-                        return;
-                    }
-                });
-
-            }
-            if (isFirstBG && columns[1] === "BG") isFirstBG = false;
+            allMVs.set(mv.ID, mv);
         }
+
+        allMVs.forEach(function (value) {
+            if (value.BeforeID !== null) {
+                value.Before = allMVs.get(value.BeforeID);
+            }
+            if (value.AutoNextID !== null) {
+                value.AutoNext = allMVs.get(value.AutoNextID);
+                value.Dom.onended = function () {
+                    value.FadeState = 0;
+                    value.AutoNext.FadeState = 1;
+                    value.AutoNext.Dom.hidden = false;
+                    value.AutoNext.Dom.play();
+                    fadeVideos.set(value.ID, value);
+                    fadeVideos.set(value.AutoNext.ID, value.AutoNext);
+                    if (fadeVideos.size > 0) PlayFades();
+                };
+            }
+        });
     };
     reader.readAsBinaryString(fileInput.files[0]);
     document.getElementById("bgContain").hidden = false;
@@ -190,7 +218,7 @@ loadCSV = function () {
 
 vedioControl = function (keyCode) {
     if (keyCode === 123) return;
-    if (mapper.has(keyCode)) {
-        mapper.get(keyCode).Fire();
+    if (fireVideoKeys.has(keyCode)) {
+        fireVideoKeys.get(keyCode).Fire();
     }
 };
