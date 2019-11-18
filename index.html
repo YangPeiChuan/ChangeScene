@@ -23,13 +23,11 @@
 
 <body onkeydown="vedioControl(event.keyCode)">
     <div id="loadCSVArea">
-        <input id="csv" type="file" /><input id="loadCSV" type="button" value="讀取CSV" onclick="loadCSV()" />
+        <input id="csv" type="file" accept=".csv" /><input id="loadCSV" type="button" value="讀取CSV" onclick="loadCSV()" />
     </div>
     <div id="bgContain" hidden="hidden" class="fixPosition">
-        <!--<video id="vBG" muted autoplay="autoplay" loop="loop" src="Screnes/1/main.mp4"></video>-->
     </div>
     <div id="objects" hidden="hidden" class="fixPosition">
-        <!--<video src="Screnes/1/action3.webm" muted autoplay="autoplay" loop="loop"></video>-->
     </div>
     <script type="text/javascript" src="processor.js"></script>
 </body>
