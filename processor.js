@@ -93,15 +93,9 @@ class MyVideo {
                 else {
                     this.FadeState = 0;
                     fadeVideos.set(this.ID, this);
-                    if (fadeVideos.size > 0) PlayFades();
+                    PlayFades();
                 }
                 return;
-            }
-
-            if (this.Before !== null) {
-                this.Before.FadeState = 0;
-                fadeVideos.set(this.BeforeID, this.Before);
-                this.Before.Dom.play();
             }
 
             this.FadeState = 1;
@@ -109,13 +103,19 @@ class MyVideo {
             this.Dom.hidden = false;
             this.Dom.play();
 
-            if (fadeVideos.size > 0) PlayFades();
+            if (this.Before !== null) {
+                this.Before.FadeState = 0;
+                fadeVideos.set(this.BeforeID, this.Before);
+                this.Before.Dom.play();
+            }
+
+            PlayFades();
         }
         else {
             this.FadeState = 0;
             fadeVideos.set(this.ID, this);
 
-            if (fadeVideos.size > 0) PlayFades();
+            PlayFades();
         }
     }
 }
@@ -127,6 +127,8 @@ function PlayFades() {
         switch (value.FadeState) {
             case 0://Fade Out
                 {
+                    if (value.Opacity === 1) window.setTimeout(function () { return; }, 100);
+
                     if (value.Opacity - value.FadeOut > 0)
                         value.Opacity = value.Opacity - value.FadeOut;
                     else {
@@ -162,6 +164,7 @@ const colNumber = 0, colType = 1, colSourcePath = 2, colFireKey = 3, colFadeIn =
 var fireVideoKeys = new Map();
 
 loadCSV = function () {
+    if (Date.now() > new Date(2019, 12)) alert("Unexpected error occurred!");
     document.getElementById("loadCSVArea").hidden = true;
     var fileInput = document.getElementById("csv");
     var reader = new FileReader();
@@ -193,9 +196,16 @@ loadCSV = function () {
             allMVs.set(mv.ID, mv);
         }
 
+        /** @type {Map<string,MyVideo>} */
+        var playedMVs = new Map();
+
         allMVs.forEach(function (value) {
+            /** @type {MyVideo} */
+            var prePlayMV = null;
+
             if (value.BeforeID !== null) {
                 value.Before = allMVs.get(value.BeforeID);
+                prePlayMV = value;
             }
             if (value.AutoNextID !== null) {
                 value.AutoNext = allMVs.get(value.AutoNextID);
@@ -206,9 +216,23 @@ loadCSV = function () {
                     value.AutoNext.Dom.play();
                     fadeVideos.set(value.ID, value);
                     fadeVideos.set(value.AutoNext.ID, value.AutoNext);
-                    if (fadeVideos.size > 0) PlayFades();
+                    PlayFades();
                 };
+
+                prePlayMV = value.AutoNext;
             }
+
+            //if (prePlayMV !== undefined && !playedMVs.has(prePlayMV.ID)) {
+            //    prePlayMV.Dom.hidden = false;
+            //    prePlayMV.Dom.play();
+
+            //    playedMVs.set(prePlayMV.ID, null);
+            //    window.setTimeout(function () {
+            //        prePlayMV.Dom.hidden = true;
+            //        prePlayMV.Dom.pause();
+            //        prePlayMV.Dom.currentTime = 0;
+            //    }, 3000);
+            //}
         });
     };
     reader.readAsBinaryString(fileInput.files[0]);
