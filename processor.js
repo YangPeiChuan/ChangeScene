@@ -127,16 +127,27 @@ function PlayFades() {
         switch (value.FadeState) {
             case 0://Fade Out
                 {
-                    if (value.Opacity === 1) window.setTimeout(function () { return; }, 100);
-
-                    if (value.Opacity - value.FadeOut > 0)
-                        value.Opacity = value.Opacity - value.FadeOut;
-                    else {
-                        value.Dom.hidden = true;
-                        value.Opacity = 0;
-                        value.Dom.pause();
-                        value.Dom.currentTime = 0;
-                        waitDeleteKeys.push(key);
+                    if (value.Opacity === 1) window.setTimeout(function () {
+                        if (value.Opacity - value.FadeOut > 0)
+                            value.Opacity = value.Opacity - value.FadeOut;
+                        else {
+                            value.Dom.hidden = true;
+                            value.Opacity = 0;
+                            value.Dom.pause();
+                            value.Dom.currentTime = 0;
+                            waitDeleteKeys.push(key);
+                        }
+                    }, 100);
+                    else{
+                        if (value.Opacity - value.FadeOut > 0)
+                            value.Opacity = value.Opacity - value.FadeOut;
+                        else {
+                            value.Dom.hidden = true;
+                            value.Opacity = 0;
+                            value.Dom.pause();
+                            value.Dom.currentTime = 0;
+                            waitDeleteKeys.push(key);
+                        }
                     }
                     break;
                 }
