@@ -207,9 +207,6 @@ loadCSV = function () {
             allMVs.set(mv.ID, mv);
         }
 
-        /** @type {Map<string,MyVideo>} */
-        var playedMVs = new Map();
-
         allMVs.forEach(function (value) {
             /** @type {MyVideo} */
             var prePlayMV = null;
