@@ -138,7 +138,7 @@ function PlayFades() {
                             waitDeleteKeys.push(key);
                         }
                     }, 100);
-                    else{
+                    else {
                         if (value.Opacity - value.FadeOut > 0)
                             value.Opacity = value.Opacity - value.FadeOut;
                         else {
@@ -207,16 +207,9 @@ loadCSV = function () {
             allMVs.set(mv.ID, mv);
         }
 
-        /** @type {Map<string,MyVideo>} */
-        var playedMVs = new Map();
-
         allMVs.forEach(function (value) {
-            /** @type {MyVideo} */
-            var prePlayMV = null;
-
             if (value.BeforeID !== null) {
                 value.Before = allMVs.get(value.BeforeID);
-                prePlayMV = value;
             }
             if (value.AutoNextID !== null) {
                 value.AutoNext = allMVs.get(value.AutoNextID);
@@ -229,21 +222,7 @@ loadCSV = function () {
                     fadeVideos.set(value.AutoNext.ID, value.AutoNext);
                     PlayFades();
                 };
-
-                prePlayMV = value.AutoNext;
             }
-
-            //if (prePlayMV !== undefined && !playedMVs.has(prePlayMV.ID)) {
-            //    prePlayMV.Dom.hidden = false;
-            //    prePlayMV.Dom.play();
-
-            //    playedMVs.set(prePlayMV.ID, null);
-            //    window.setTimeout(function () {
-            //        prePlayMV.Dom.hidden = true;
-            //        prePlayMV.Dom.pause();
-            //        prePlayMV.Dom.currentTime = 0;
-            //    }, 3000);
-            //}
         });
     };
     reader.readAsBinaryString(fileInput.files[0]);
